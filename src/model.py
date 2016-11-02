@@ -9,9 +9,13 @@ import theano.tensor as T
 class PhraseLevel_Sentiment_Classification(object):
     def __init__(self, rng, n_pairs, A, X_prime, lambda_1=1):
 
+                # value = np.asarray(
+                    # rng.uniform(low=0, high=0.5, size=(n_pairs, 2)),
+                    # dtype=theano.config.floatX
+                    # ),
         self.X = theano.shared(
                 value = np.asarray(
-                    rng.uniform(low=-0.1, high=0.1, size=(n_pairs, 2)),
+                    np.random.dirichlet(np.ones(2), size=n_pairs),
                     dtype=theano.config.floatX
                     ),
                 name = 'X',
@@ -25,7 +29,8 @@ class PhraseLevel_Sentiment_Classification(object):
         self.params = [self.X]
 
         # R1 represents the squared error of Review-level Sentiment Orientation
-        self.R1 = self.lambda_1 * T.sum((T.dot(self.A, self.X) - self.X_prime)**2)
+        self.R1 = self.lambda_1 * \
+                T.sqrt(T.sum((T.dot(self.A, self.X) - self.X_prime)**2))
 
     def cost(self):
         return self.R1

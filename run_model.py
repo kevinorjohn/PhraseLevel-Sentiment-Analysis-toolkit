@@ -80,7 +80,7 @@ def main():
     # training
     print('training PhraseLevel Sentiment Classification...')
     patience = 2
-    patience_threshold = 16
+    patience_threshold = 32
     improvement_threshold = 0.995
 
     start_time = timeit.default_timer()
