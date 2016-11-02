@@ -66,8 +66,10 @@ def main():
 
     # updating rule
     updates = [(clf.X, 
-        (clf.lambda_1 * T.dot(clf.A.T, clf.X_prime)) / \
+        clf.X * T.sqrt(
+            (clf.lambda_1 * T.dot(clf.A.T, clf.X_prime)) / \
                 (clf.lambda_1 * T.dot(T.dot(clf.A.T,A), clf.X))
+                )
         )]
 
     
