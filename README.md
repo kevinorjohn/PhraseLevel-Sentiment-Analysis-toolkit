@@ -16,22 +16,33 @@ Prerequisite
 Set the file path in the Makefile:
 ```
 all:
-	python3 run_model.py -i INPUT_PATH -o OUTPUT_PATH
+	python3 run_model.py -i YOUR_INPUT_PATH -o YOUR_OUTPUT_PATH
 ```
 
 The input directory requires seven numpy matrices:
 
-* **A.npy:** matrix, shape = [m_reviews, n_pairs]
-* **X\_prime.npy:** matrix, shape = [m_reviews, 2]
-* **G.npy:** vector, shape = [n_pairs]
-* **X\_zero.npy:** matrix, shape = [n_pairs, 2]
-* **W\_a.npy:** 
-    > matrix, shape = [n_pairs, n_pairs]
-* **W\_b.npy:**
-    > array-like or sparse matrix, shape = [n_pairs, n_pairs]
-* **W\_s.npy:**
-    > array-like or sparse matrix, shape = [n_pairs, n_pairs]
+* **A.npy:** array-like or sparse matrix, shape = [m_reviews, n_pairs]
+* **X_prime.npy:** array-like or sparse matrix, shape = [m_reviews, 2]
+* **G.npy:** array-like or vector, shape = [n_pairs]
+* **X_zero.npy:** array-like or sparse matrix, shape = [n_pairs, 2]
+* **W_a.npy:** array-like or sparse matrix, shape = [n_pairs, n_pairs]
+* **W_b.npy:** array-like or sparse matrix, shape = [n_pairs, n_pairs]
+* **W_s.npy:** array-like or sparse matrix, shape = [n_pairs, n_pairs]
 
+Usage
+-----
+
+There are two ways to execute the program
+
+* The simpliest is use the command line to run the program
+```python
+python3 run_model.py -i YOUR_INPUT_PATH -o YOUR_OUTPUT_PATH
+```
+
+* You could also amend the file path in the Makefile and do it by using make, e.g.,
+```
+> make
+```
 
 Reference
 ---------
