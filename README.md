@@ -22,19 +22,19 @@ all:
 The input directory requires seven numpy matrices:
 
 1. 	A.npy
-	> array-like or sparse matrix, shape = [m_reviews, n_pairs]
+> array-like or sparse matrix, shape = [m_reviews, n_pairs]
 2. 	X\_prime.npy
-	> array-like or sparse matrix, shape = [m_reviews, 2]
+> array-like or sparse matrix, shape = [m_reviews, 2]
 3. 	G.npy
-	> array-like or vector, shape = [n_pairs]
+> array-like or vector, shape = [n_pairs]
 4. 	X\_zero.npy
-	> array-like or sparse matrix, shape = [n_pairs, 2]
+> array-like or sparse matrix, shape = [n_pairs, 2]
 5. 	W\_a.npy
-	> array-like or sparse matrix, shape = [n_pairs, n_pairs]
+> array-like or sparse matrix, shape = [n_pairs, n_pairs]
 6. 	W\_b.npy
-	> array-like or sparse matrix, shape = [n_pairs, n_pairs]
+> array-like or sparse matrix, shape = [n_pairs, n_pairs]
 7. 	W\_s.npy
-	> array-like or sparse matrix, shape = [n_pairs, n_pairs]
+> array-like or sparse matrix, shape = [n_pairs, n_pairs]
 	
 
 Reference
