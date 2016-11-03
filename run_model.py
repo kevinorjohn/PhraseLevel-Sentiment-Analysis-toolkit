@@ -14,8 +14,13 @@ from src.model import PhraseLevel_Sentiment_Classification
 def load_data(input_dir):
     A = np.load(os.path.join(input_dir, 'A.npy'))
     X_prime = np.load(os.path.join(input_dir, 'X_prime.npy'))
+    G = np.load(os.path.join(input_dir, 'G.npy'))
+    X_zero = np.load(os.path.join(input_dir, 'X_zero.npy'))
+    W_a = np.load(os.path.join(input_dir, 'W_a.npy'))
+    W_b = np.load(os.path.join(input_dir, 'W_b.npy'))
+    W_s = np.load(os.path.join(input_dir, 'W_s.npy'))
 
-    return A, X_prime
+    return A, X_prime, G, X_zero, W_a, W_b, W_s
 
 
 def dump_model(args, clf):
@@ -43,7 +48,8 @@ def main():
     
     # TODO: load dataset
     print('loading data...')
-    A_train, X_prime_train = load_data(args.input_dir)
+    A_train, X_prime_train, G_train, X_zero_train,\
+            W_a_train, W_b_train, W_s_train = load_data(args.input_dir)
 
 
     # TODO : build model 
@@ -52,29 +58,47 @@ def main():
     # generate symbolic variables for input A, X_prime
     A = T.matrix('A')
     X_prime = T.matrix('X_prime')
+    G = T.vector('G')
+    X_zero = T.matrix('X_zero')
+    W_a = T.matrix('W_a')
+    W_b = T.matrix('W_b')
+    W_s = T.matrix('W_s')
 
     # construct phrase-level sentiment classification
-    rng = np.random.RandomState(1126)
     clf = PhraseLevel_Sentiment_Classification(
-            rng, 
             A_train.shape[1], 
-            A, X_prime
+            A, X_prime,
+            G, X_zero,
+            W_a, W_b, 
+            W_s
             )
 
     # cost function
     cost = clf.cost()
 
     # updating rule
-    updates = [(clf.X, 
-        clf.X * T.sqrt(
-            (clf.lambda_1 * T.dot(clf.A.T, clf.X_prime)) / \
-                (clf.lambda_1 * T.dot(T.dot(clf.A.T,A), clf.X))
-                )
-        )]
+    updates = [(clf.X, clf.X * T.sqrt(
+        (clf.lambda_1 * T.dot(clf.A.T, clf.X_prime) + 
+            clf.lambda_2 * T.dot(clf.G, clf.X_zero) +
+            clf.lambda_3 * T.dot(clf.W_a, clf.X) +
+            clf.lambda_3 * T.dot(T.dot(clf.W_b, clf.X), clf.E) + 
+            clf.lambda_4 * T.dot(clf.W_s, clf.X)
+            ) /
+        (clf.lambda_1 * T.dot(T.dot(clf.A.T, A), clf.X) +
+            clf.lambda_2 * T.dot(clf.G, clf.X) +
+            clf.lambda_3 * T.dot(clf.D, clf.X) +
+            clf.lambda_4 * T.dot(clf.D_s, clf.X)
+            )
+        ))]
 
     
     train_model = theano.function(
-            inputs = [A, X_prime],
+            inputs = [
+                A, X_prime,
+                G, X_zero,
+                W_a, W_b,
+                W_s
+                ],
             outputs = cost,
             updates = updates
             )
@@ -93,7 +117,12 @@ def main():
     while (epoch < n_epochs) and (patience > epoch):
         epoch += 1
 
-        this_train_loss = train_model(A_train, X_prime_train)
+        this_train_loss = train_model(
+                A_train, X_prime_train,
+                G_train, X_zero_train,
+                W_a_train, W_b_train,
+                W_s_train
+                )
         if this_train_loss < best_train_loss:
             if this_train_loss < best_train_loss * \
                     improvement_threshold:
