@@ -7,12 +7,18 @@ import timeit
 import numpy as np
 import theano
 import theano.tensor as T
+from scipy.sparse import csr_matrix
 from theano.tensor.shared_randomstreams import RandomStreams
 
 from src.model import PhraseLevel_Sentiment_Classification
 
 def load_data(input_dir):
-    A = np.load(os.path.join(input_dir, 'A.npy'))
+    def load_sparse_csr(filename):
+        loader = np.load(os.path.join(input_dir, filename))
+        return csr_matrix((loader['data'], loader['indices'], loader['indptr']),
+                shape = loader['shape'])
+    A = load_sparse_csr('A.npz')
+    # A = np.load(os.path.join(input_dir, 'A.npy'))
     X_prime = np.load(os.path.join(input_dir, 'X_prime.npy'))
     G = np.load(os.path.join(input_dir, 'G.npy'))
     X_zero = np.load(os.path.join(input_dir, 'X_zero.npy'))
