@@ -5,6 +5,7 @@ import timeit
 import numpy as np
 import theano
 import theano.tensor as T
+from theano import sparse
 
 class PhraseLevel_Sentiment_Classification(object):
     def __init__(self, n_pairs, A, X_prime, G, X_zero, W_a, W_b, W_s,
@@ -45,7 +46,7 @@ class PhraseLevel_Sentiment_Classification(object):
 
         # R1 represents the error of Review-level Sentiment Orientation
         self.R1 = self.lambda_1 * \
-                T.sqrt(T.sum((T.dot(self.A, self.X) - self.X_prime)**2))
+                T.sqrt(T.sum((sparse.basic.dot(self.A, self.X) - self.X_prime)**2))
 
         # R2 represents the error of General Sentiment Lexicon
         self.R2 = self.lambda_2 * \

@@ -8,6 +8,7 @@ import numpy as np
 import theano
 import theano.tensor as T
 from scipy.sparse import csr_matrix
+from theano import sparse
 from theano.tensor.shared_randomstreams import RandomStreams
 
 from src.model import PhraseLevel_Sentiment_Classification
@@ -16,17 +17,18 @@ def load_data(input_dir):
     def load_sparse_csr(filename):
         loader = np.load(os.path.join(input_dir, filename))
         return csr_matrix((loader['data'], loader['indices'], loader['indptr']),
-                shape = loader['shape'])
-    A = load_sparse_csr('A.npz')
-    # A = np.load(os.path.join(input_dir, 'A.npy'))
-    X_prime = np.load(os.path.join(input_dir, 'X_prime.npy'))
-    G = np.load(os.path.join(input_dir, 'G.npy'))
-    X_zero = np.load(os.path.join(input_dir, 'X_zero.npy'))
-    W_a = np.load(os.path.join(input_dir, 'W_a.npy'))
-    W_b = np.load(os.path.join(input_dir, 'W_b.npy'))
-    W_s = np.load(os.path.join(input_dir, 'W_s.npy'))
+                shape = loader['shape'], dtype="float64")
 
-    return A, X_prime, G, X_zero, W_a, W_b, W_s
+    data = {
+            'A': load_sparse_csr('A.npz'),
+            'X_prime': np.load(os.path.join(input_dir, 'X_prime.npy')),
+            'G': np.load(os.path.join(input_dir, 'G.npy')),
+            'X_zero': np.load(os.path.join(input_dir, 'X_zero.npy')),
+            'W_a': np.load(os.path.join(input_dir, 'W_a.npy')),
+            'W_b': np.load(os.path.join(input_dir, 'W_b.npy')),
+            'W_s': np.load(os.path.join(input_dir, 'W_s.npy')),
+            }
+    return data
 
 
 def dump_model(args, clf):
@@ -52,17 +54,17 @@ def get_parser():
 def main():
     args = get_parser()
     
-    # TODO: load dataset
+    # load dataset
     print('loading data...')
-    A_train, X_prime_train, G_train, X_zero_train,\
-            W_a_train, W_b_train, W_s_train = load_data(args.input_dir)
+    data = load_data(args.input_dir)
 
 
-    # TODO : build model 
+    # build model 
     print('building the model...')
 
     # generate symbolic variables for input A, X_prime
-    A = T.matrix('A')
+    # A = T.matrix('A')
+    A = sparse.csr_matrix('A')
     X_prime = T.matrix('X_prime')
     G = T.vector('G')
     X_zero = T.matrix('X_zero')
@@ -72,7 +74,7 @@ def main():
 
     # construct phrase-level sentiment classification
     clf = PhraseLevel_Sentiment_Classification(
-            A_train.shape[1], 
+            data['A'].shape[1], 
             A, X_prime,
             G, X_zero,
             W_a, W_b, 
@@ -84,16 +86,17 @@ def main():
 
     # updating rule
     updates = [(clf.X, clf.X * T.sqrt(
-        (clf.lambda_1 * T.dot(clf.A.T, clf.X_prime) + 
+        (clf.lambda_1 * sparse.basic.dot(clf.A.T, clf.X_prime) + 
             clf.lambda_2 * T.dot(clf.G, clf.X_zero) +
             clf.lambda_3 * T.dot(clf.W_a, clf.X) +
             clf.lambda_3 * T.dot(T.dot(clf.W_b, clf.X), clf.E) + 
             clf.lambda_4 * T.dot(clf.W_s, clf.X)
             ) /
-        (clf.lambda_1 * T.dot(T.dot(clf.A.T, A), clf.X) +
+        (clf.lambda_1 * T.dot(sparse.basic.dot(clf.A.T, A), clf.X) +
             clf.lambda_2 * T.dot(clf.G, clf.X) +
             clf.lambda_3 * T.dot(clf.D, clf.X) +
-            clf.lambda_4 * T.dot(clf.D_s, clf.X)
+            clf.lambda_4 * T.dot(clf.D_s, clf.X) +
+            10**-8
             )
         ))]
 
@@ -124,10 +127,10 @@ def main():
         epoch += 1
 
         this_train_loss = train_model(
-                A_train, X_prime_train,
-                G_train, X_zero_train,
-                W_a_train, W_b_train,
-                W_s_train
+                data['A'], data['X_prime'],
+                data['G'], data['X_zero'],
+                data['W_a'], data['W_b'],
+                data['W_s']
                 )
         if this_train_loss < best_train_loss:
             if this_train_loss < best_train_loss * \
