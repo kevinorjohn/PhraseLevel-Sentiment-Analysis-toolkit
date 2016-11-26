@@ -14,14 +14,14 @@ Prerequisite
 ------------
 
 Set the file path in the Makefile:
-```
+```bash
 all:
 	python3 run_model.py -i YOUR_INPUT_PATH -o YOUR_OUTPUT_PATH
 ```
 
 The input directory requires seven numpy matrices:
 
-* **A.npy:** array-like or sparse matrix, shape = [m_reviews, n_pairs]
+* **A.npz:** sparse matrix, shape = [m_reviews, n_pairs]
 * **X_prime.npy:** array-like or sparse matrix, shape = [m_reviews, 2]
 * **G.npy:** array-like or vector, shape = [n_pairs]
 * **X_zero.npy:** array-like or sparse matrix, shape = [n_pairs, 2]
