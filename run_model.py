@@ -35,6 +35,8 @@ def dump_model(args, clf):
     with open(os.path.join(args.output_dir, 'best_model.pkl'), 'wb') as fp:
         pickle.dump(clf, fp)
 
+    np.save(os.path.join(args.output_dir, 'X'), clf.X.get_value())
+
 
 def get_parser():
     parser = argparse.ArgumentParser(
